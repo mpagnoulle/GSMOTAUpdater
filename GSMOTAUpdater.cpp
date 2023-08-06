@@ -335,9 +335,9 @@ bool GSMOTAUpdater::verifyMD5(const char *fileName, char *knownMD5)
 		MD5Builder md5;
 
 		uint8_t bufferSize = 128;
-    uint8_t buffer[bufferSize];
-    int bytesRead = 0;
-    unsigned long currentBytes = 0;
+		uint8_t buffer[bufferSize];
+		int bytesRead = 0;
+		unsigned long currentBytes = 0;
 
 		file = fileSystem->open(fileName, FILE_READ);
 		md5.begin();
@@ -348,21 +348,21 @@ bool GSMOTAUpdater::verifyMD5(const char *fileName, char *knownMD5)
 			return false;
 		}
 
-    while (file.available()) {
-      buffer[bytesRead] = file.read();
-      bytesRead++;
+		while (file.available()) {
+			buffer[bytesRead] = file.read();
+			bytesRead++;
 
-      if (bytesRead == bufferSize) {
-        md5.add(buffer, bufferSize);
-        currentBytes += bufferSize;
-        bytesRead = 0;
-      }
-    }
+			if (bytesRead == bufferSize) {
+				md5.add(buffer, bufferSize);
+				currentBytes += bufferSize;
+				bytesRead = 0;
+			}
+		}
 
-    if (bytesRead > 0) {
-      md5.add(buffer, bytesRead);
-      currentBytes += bytesRead;
-    }
+		if (bytesRead > 0) {
+			md5.add(buffer, bytesRead);
+			currentBytes += bytesRead;
+		}
 
 		file.close();
 		md5.calculate();
@@ -461,13 +461,13 @@ bool GSMOTAUpdater::performUpdate(const char *fileName) {
 
 void GSMOTAUpdater::onDownloadFirmwareProgress(GSMOTAUpdater_Progress fn)
 {		
-    _progress_callback = fn;
+	_progress_callback = fn;
 }
 
 void GSMOTAUpdater::downloadFirmwareProgress(unsigned long progress, unsigned long total)
 {
-    if (_progress_callback != nullptr)
-        _progress_callback(progress, total);
+	if (_progress_callback != nullptr)
+		_progress_callback(progress, total);
 }
 
 void GSMOTAUpdater::rstATResponse()
@@ -482,9 +482,9 @@ void GSMOTAUpdater::rstATResponse()
  * @param binaryData The output buffer to store the binary data.
  */
 void GSMOTAUpdater::hexStringToBinary(const char* hexString, unsigned char* binaryData) {
-    size_t len = strlen(hexString);
-    for (size_t i = 0; i < len; i += 2) {
-				const char tmpString[] = {hexString[i],  hexString[i+ 1]};
-        sscanf(tmpString, "%2hhx", &binaryData[i / 2]);
-    }
+	size_t len = strlen(hexString);
+	for (size_t i = 0; i < len; i += 2) {
+		const char tmpString[] = {hexString[i],  hexString[i+ 1]};
+        	sscanf(tmpString, "%2hhx", &binaryData[i / 2]);
+    	}
 }
