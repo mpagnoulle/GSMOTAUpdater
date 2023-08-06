@@ -6,14 +6,8 @@
 #include <FS.h>
 #include <Update.h>
 #include "XBase64.h"
-//#define DEST_FS_USES_SPIFFS
-//#define DEST_FS_USES_FFAT
-#define DEST_FS_USES_SD
-//#define DEST_FS_USES_SD_MMC
-//#define DEST_FS_USES_LITTLEFS
-#include <ESP32-targz.h>
 
-#define DEBUG 			false
+#define DEBUG 			true
 
 class GSMOTAUpdater
 {
@@ -26,7 +20,6 @@ class GSMOTAUpdater
 		void init(const char *, int, const char *, unsigned long, HardwareSerial *, FS *);
 		bool download(const char *);
 		bool verifyMD5(const char *, char *);
-		bool expandFile(const char *, const char *);
 		bool performUpdate(const char *);
 		typedef std::function<void(unsigned long, unsigned long)> GSMOTAUpdater_Progress;
 		void onDownloadFirmwareProgress(GSMOTAUpdater_Progress fn);
