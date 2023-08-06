@@ -389,40 +389,6 @@ bool GSMOTAUpdater::verifyMD5(const char *fileName, char *knownMD5)
 }
 
 /**
- * Expand the gzip file
- *
- * @return True if expansion succesful
- */
-bool GSMOTAUpdater::expandFile(const char *src, const char *dest) {
-	if(!isInitialized) {
-		gota_log_e("Class: Not initialized");
-		return false;
-	}
-
-	bool ret = false;
-	GzUnpacker *GZUnpacker = new GzUnpacker();
-
-	GZUnpacker->haltOnError(false);
-	GZUnpacker->setupFSCallbacks(targzTotalBytesFn, targzFreeBytesFn); // prevent the partition from exploding, recommended
-	GZUnpacker->setGzProgressCallback(BaseUnpacker::defaultProgressCallback); // targzNullProgressCallback or defaultProgressCallback
-	GZUnpacker->setLoggerCallback(BaseUnpacker::targzPrintLoggerCallback);
-	GZUnpacker->setPsram(true);
-
-	if(!GZUnpacker->gzExpander(*fileSystem, src, *fileSystem, dest)) {
-		Serial.printf("gzExpander failed with return code #%d", GZUnpacker->tarGzGetError() );
-		//setError(GOTA_GZIP_FAIL);
-	} else {
-		ret = true;
-		fileSystem->remove(src); 
-	}
-
-	delete GZUnpacker;
-	
-	return ret;
-}
-
-
-/**
  * Starts the flashing process of the ESP32.
  *
  * @param fileName The name of the file containing the firmware.
