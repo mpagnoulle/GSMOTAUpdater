@@ -58,18 +58,18 @@ class GSMOTAUpdater
 
 
 #if defined ESP32
-  #define HEAP_AVAILABLE() ESP.getFreeHeap()
+	#define HEAP_AVAILABLE() ESP.getFreeHeap()
 
-  #ifdef ESP32
-    #define GOTA_LOG_FORMAT(letter, format)  "[" #letter "][%s:%u][H:%u] %s(): " format "\r\n", __FILE__, __LINE__, HEAP_AVAILABLE(), __FUNCTION__
+	#ifdef ESP32
+		#define GOTA_LOG_FORMAT(letter, format)  "[" #letter "][%s:%u][H:%u] %s(): " format "\r\n", __FILE__, __LINE__, HEAP_AVAILABLE(), __FUNCTION__
 
-    #if defined DEBUG_ESP_PORT
-      #define gota_log_d(format, ...) DEBUG_ESP_PORT.printf(GOTA_LOG_FORMAT(N, format), ##__VA_ARGS__);
-      #define gota_log_e(format, ...) DEBUG_ESP_PORT.printf(GOTA_LOG_FORMAT(E, format), ##__VA_ARGS__);
+		#if defined DEBUG_ESP_PORT
+			#define gota_log_d(format, ...) DEBUG_ESP_PORT.printf(GOTA_LOG_FORMAT(N, format), ##__VA_ARGS__);
+			#define gota_log_e(format, ...) DEBUG_ESP_PORT.printf(GOTA_LOG_FORMAT(E, format), ##__VA_ARGS__);
 
-    #else
-      #define gota_log_d(format, ...) Serial.printf(GOTA_LOG_FORMAT(N, format), ##__VA_ARGS__);
-      #define gota_log_e(format, ...) Serial.printf(GOTA_LOG_FORMAT(E, format), ##__VA_ARGS__);
-    #endif
+		#else
+			#define gota_log_d(format, ...) Serial.printf(GOTA_LOG_FORMAT(N, format), ##__VA_ARGS__);
+			#define gota_log_e(format, ...) Serial.printf(GOTA_LOG_FORMAT(E, format), ##__VA_ARGS__);
+		#endif
 	#endif
 #endif
