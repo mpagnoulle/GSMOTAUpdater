@@ -5,7 +5,6 @@
 #include <MD5Builder.h>
 #include <FS.h>
 #include <Update.h>
-#include "XBase64.h"
 
 #define DEBUG 			true
 
