@@ -2,6 +2,8 @@
 
 A PlatformIO/Arduino library for updating ESP32 firmware over-the-air using a SIM800C GSM modem.
 
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/mpagnoulle/library/GSMOTAUpdater.svg)](https://registry.platformio.org/libraries/mpagnoulle/GSMOTAUpdater)
+
 ## Features
 
 - Download firmware via GPRS using HTTP range requests
@@ -19,7 +21,7 @@ Add to your `platformio.ini`:
 
 ```ini
 lib_deps =
-    https://github.com/mpagnoulle/GSMOTAUpdater.git
+    mpagnoulle/GSMOTAUpdater@^1.0.0
 ```
 
 ### Arduino IDE
