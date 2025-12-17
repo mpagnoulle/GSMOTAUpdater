@@ -1,47 +1,120 @@
 # GSMOTAUpdater
-This class can make it possible for you to update the firmware of your ESP32 over the air by downloading the firmware using a SIM800(C) modem.
 
-## ⚠️ A few things to note
-- This class is provided as-is with no guarantee that it will be working with your project without some tweaking done on your side.
-- As this class is using AT commands to communicate with the modem, it is not compatible with TinyGSM.
-- This has been made to write the downloaded file on an external flash memory chip, if you want to download it in the ESP32's SPIFFS memory, it is possible by passing the right file system, just be mindful of available space.
+A PlatformIO/Arduino library for updating ESP32 firmware over-the-air using a SIM800C GSM modem.
 
-## How does it work?
-1. The class is first initialized with the requirements parameters
-2. The download request is being made, the firmware will be downloaded in chunks of 25 000 bytes (**your server need to support range requests**, the size of the chunk can be changed)
-3. Once downloaded, you can verify the md5 hash of the downloaded file against a known hash, that is to prevent writing corrupt data to the ESP32 which could result in bricking it (can be solved by flashing it via esptools)
-4. If all is good, you can then perform the firmware update with the downloaded file
+## Features
 
-If the download of a chunk fails due to a loss of connection, the download of that specific chunk will be restarted, after testing, this was the best way to ensure file integrity (compare to resuming to the last written byte).
+- Download firmware via GPRS using HTTP range requests
+- Resumable chunk-based downloads (default 25KB chunks)
+- MD5 hash verification before flashing
+- Progress callback support
+- Runtime debug logging control
+- Works with any filesystem (SPIFFS, LittleFS, external flash)
 
-*Patience is needed as the whole update process can take up to 20 minutes for a file of 1MB.*
+## Installation
 
-## How to use
-Here is a quick example on how to use the class:
+### PlatformIO (recommended)
+
+Add to your `platformio.ini`:
+
+```ini
+lib_deps =
+    https://github.com/mpagnoulle/GSMOTAUpdater.git
+```
+
+### Arduino IDE
+
+1. Download this repository as ZIP
+2. In Arduino IDE: Sketch → Include Library → Add .ZIP Library
+
+## Important Notes
+
+- This library uses AT commands directly - **not compatible with TinyGSM**
+- Your server must support HTTP range requests
+- Download can take ~20 minutes for a 1MB file over GPRS
+- Mid-chunk connection drops are automatically retried
+- Initial connection failures return `false` - handle by restarting or retrying
+
+## Quick Example
+
 ```cpp
+#include <GSMOTAUpdater.h>
+#include <SPIFFS.h>
+
+GSMOTAUpdater otaUpdater;
+HardwareSerial SerialAT(1);
+
 void performFirmwareUpdate() {
-  // Initialize the FOTA updater
-  fotaUpdater.init(serverAddress, 443, downloadPath, fileSize, & SerialSIM800C, & FileSystem);
+    // Initialize
+    otaUpdater.init(serverAddress, 443, downloadPath, fileSize, &SerialAT, &SPIFFS);
+    otaUpdater.setDebug(true);
+    otaUpdater.chunkSize = 25000;
+    otaUpdater.onDownloadFirmwareProgress(onProgress);
 
-  // Adjust chunk size
-  fotaUpdater.chunkSize = 25000;
-
-  // Set progress callback
-  fotaUpdater.onDownloadFirmwareProgress(onUpdateProgress);
-
-  // Download firmware
-  if (fotaUpdater.download(firmwareFile)) { // firmwareFile is the name of the file you want to write to memory
-    // Verify MD5 hash
-    if (fotaUpdater.verifyMD5(firmwareFile, knownMD5)) {
-      // Perform the update
-      if (fotaUpdater.performUpdate(firmwareFile)) {
-        Serial.println("Flashed successfully!");
-        // Reset ESP32 to boot on new firmware
-      }
+    // Download firmware (mid-chunk drops are auto-retried)
+    if (!otaUpdater.download(firmwareFile)) {
+        Serial.println("Download failed!");
+        ESP.restart();  // Restart and try again
     }
-  }
+
+    // Verify MD5 (strongly recommended)
+    if (!otaUpdater.verifyMD5(firmwareFile, knownMD5)) {
+        Serial.println("MD5 mismatch!");
+        ESP.restart();
+    }
+
+    // Flash the firmware
+    if (!otaUpdater.performUpdate(firmwareFile)) {
+        Serial.println("Update failed!");
+        ESP.restart();
+    }
+
+    Serial.println("Update successful!");
+    ESP.restart();
 }
 ```
-**Verifying the MD5 checksum is optional but strongly recommended to avoid writing corrupted data to the ESP32.**
 
-You can also download the firmware as a gzip file to be expanded before calling performUpdate using the ESP32-targz library.
+## API Reference
+
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `init(server, port, path, size, serial, fs)` | Initialize with server details and hardware |
+| `download(filename)` | Download firmware to file. Returns `false` on failure |
+| `verifyMD5(filename, hash)` | Verify file MD5 against known hash |
+| `performUpdate(filename)` | Flash the firmware and delete file |
+| `setDebug(enabled)` | Enable/disable debug output (default: disabled) |
+| `onDownloadFirmwareProgress(callback)` | Set progress callback `void(current, total)` |
+
+### Properties
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `chunkSize` | 25000 | Download chunk size in bytes |
+
+## How It Works
+
+1. Initialize with server address, port, download path, file size, serial port, and filesystem
+2. Firmware downloads in chunks using HTTP Range requests
+3. If connection drops mid-chunk, it automatically retries that chunk
+4. If initial connection fails, returns `false` - restart or retry as needed
+5. Verify MD5 hash before flashing (recommended to prevent bricking)
+6. Flash the firmware using ESP32's Update library
+
+## Hardware Setup
+
+```
+ESP32 TX (GPIO17) → SIM800C RX
+ESP32 RX (GPIO16) → SIM800C TX
+ESP32 GND         → SIM800C GND
+4.2V Power        → SIM800C VCC (NOT 3.3V!)
+```
+
+## Optional: GZIP Support
+
+You can download gzip-compressed firmware and decompress before flashing using the [ESP32-targz](https://github.com/tobozo/ESP32-targz) library.
+
+## License
+
+GPL-3.0

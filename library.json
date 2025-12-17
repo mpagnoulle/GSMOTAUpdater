@@ -1,0 +1,20 @@
+{
+    "name": "GSMOTAUpdater",
+    "version": "1.0.0",
+    "description": "Over-the-Air (OTA) firmware updater for ESP32 using GSM/GPRS connectivity via SIM800C modem.",
+    "keywords": ["ota", "gsm", "gprs", "sim800", "sim800c", "esp32", "fota", "firmware", "update"],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mpagnoulle/GSMOTAUpdater.git"
+    },
+    "authors": [
+        {
+            "name": "mpagnoulle",
+            "url": "https://github.com/mpagnoulle"
+        }
+    ],
+    "license": "GPL-3.0",
+    "frameworks": "arduino",
+    "platforms": "espressif32",
+    "headers": "GSMOTAUpdater.h"
+}
